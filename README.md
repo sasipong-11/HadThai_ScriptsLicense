@@ -12,10 +12,47 @@ Reusable C# library plus a small console harness for Hadthai license activation 
 
 ## API Contract
 
+- Default base URL:
+  - `https://ld-api.uat.rtt.in.th`
 - Validate:
   - `POST /api/license/validate-product?prgVersion=1`
 - Activate:
   - `POST /api/license/activate-product?prgVersion=1`
+
+## API Requests
+
+By default, the console harness sends requests to:
+
+- `https://ld-api.uat.rtt.in.th/api/license/validate-product?prgVersion=1`
+- `https://ld-api.uat.rtt.in.th/api/license/activate-product?prgVersion=1`
+
+You can override the base URL with:
+
+```bash
+--baseUrl=https://your-api-host
+```
+
+### Validate Request
+
+- Method: `POST`
+- URL: `{baseUrl}/api/license/validate-product?prgVersion=1`
+- Form fields:
+  - `keyNum`
+  - `uid`
+
+### Activate Request
+
+- Method: `POST`
+- URL: `{baseUrl}/api/license/activate-product?prgVersion=1`
+- Form fields:
+  - `keyNum`
+  - `uid`
+  - `fullname`
+  - `organizationName`
+  - `email`
+  - `phoneNo`
+
+The current implementation sends empty strings for `fullname`, `organizationName`, `email`, and `phoneNo`.
 
 The script only requires:
 
