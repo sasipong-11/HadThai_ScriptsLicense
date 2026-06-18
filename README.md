@@ -47,12 +47,6 @@ You can override the base URL with:
 - Form fields:
   - `keyNum`
   - `uid`
-  - `fullname`
-  - `organizationName`
-  - `email`
-  - `phoneNo`
-
-The current implementation sends empty strings for `fullname`, `organizationName`, `email`, and `phoneNo`.
 
 The script only requires:
 
