@@ -1,0 +1,2 @@
+# HadThai_ScriptsLicense
+HadThai_ScriptsLicense
