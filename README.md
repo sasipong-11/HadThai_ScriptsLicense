@@ -55,6 +55,9 @@ The script only requires:
 
 Contact fields are sent as empty values during activation.
 License keys can be provided with or without hyphens. The script normalizes them automatically before sending to the API.
+The client now calculates a stable machine `uid` automatically and rejects requests that try to use a different machine's `uid`.
+After a successful activation, the client stores a local binding for that license on the current machine and refuses to use the same stored license with a different machine `uid`.
+For demos, the harness can simulate a backend activation registry so the first `uid` that activates a license becomes the only one allowed for that license.
 
 ## Recommended Handoff
 
@@ -74,4 +77,20 @@ dotnet run --project HadthaiLicenseHarness -- --mode=validate --key=YOUR_LICENSE
 
 ```bash
 dotnet run --project HadthaiLicenseHarness -- --mode=activate --key=YOUR_LICENSE_KEY --uid=YOUR_DEVICE_UID
+```
+
+```bash
+dotnet run --project HadthaiLicenseHarness -- --mode=showuid
+```
+
+```bash
+dotnet run --project HadthaiLicenseHarness -- --mode=release --key=YOUR_LICENSE_KEY
+```
+
+```bash
+dotnet run --project HadthaiLicenseHarness -- --mode=activate --key=YOUR_LICENSE_KEY --uid=PHONE_A --allowUidOverride=true --simulateBackendLock=true
+```
+
+```bash
+dotnet run --project HadthaiLicenseHarness -- --mode=activate --key=YOUR_LICENSE_KEY --uid=PHONE_B --allowUidOverride=true --simulateBackendLock=true
 ```

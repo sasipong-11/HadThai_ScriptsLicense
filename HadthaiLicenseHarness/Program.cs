@@ -14,9 +14,37 @@ internal static class Program
         }
 
         string baseUrl = GetOption(options, "baseUrl", "https://ld-api.uat.rtt.in.th");
-        string mode = GetOption(options, "mode", Prompt("Mode (validate/activate)", "validate")).Trim().ToLowerInvariant();
+        string mode = GetOption(options, "mode", Prompt("Mode (validate/activate/showuid/release/resetregistry)", "validate")).Trim().ToLowerInvariant();
+        bool allowUidOverride = string.Equals(GetOption(options, "allowUidOverride", "false"), "true", StringComparison.OrdinalIgnoreCase);
+        bool simulateBackendLock = string.Equals(GetOption(options, "simulateBackendLock", "false"), "true", StringComparison.OrdinalIgnoreCase);
+
+        if (mode == "showuid")
+        {
+            Console.WriteLine($"UID: {HadthaiLicenseClient.CalculateUid()}");
+            return 0;
+        }
+
+        if (mode == "resetregistry")
+        {
+            bool removed = HadthaiLicenseClient.ClearActivationRegistry();
+            Console.WriteLine(removed
+                ? "Simulated activation registry removed."
+                : "No simulated activation registry found.");
+            return removed ? 0 : 1;
+        }
+
         string keyNum = HadthaiLicenseClient.NormalizeLicenseKey(
             GetOption(options, "key", Prompt("License key", string.Empty)));
+
+        if (mode == "release")
+        {
+            bool removed = HadthaiLicenseClient.ClearStoredLicenseBinding(keyNum);
+            Console.WriteLine(removed
+                ? "Stored license binding removed."
+                : "No stored license binding found.");
+            return removed ? 0 : 1;
+        }
+
         string uid = GetOption(options, "uid", HadthaiLicenseClient.CalculateUid());
 
         if (string.IsNullOrWhiteSpace(uid))
@@ -25,11 +53,19 @@ internal static class Program
         }
 
         using var httpClient = new HttpClient();
-        var client = new HadthaiLicenseClient(baseUrl, httpClient);
+        var client = new HadthaiLicenseClient(
+            baseUrl,
+            httpClient,
+            enforceCurrentMachineUid: !allowUidOverride,
+            simulateBackendLock: simulateBackendLock);
 
         Console.WriteLine($"Base URL: {baseUrl}");
         Console.WriteLine($"Mode: {mode}");
         Console.WriteLine($"UID: {uid}");
+        Console.WriteLine($"Allow UID Override: {allowUidOverride}");
+        Console.WriteLine($"Simulate Backend Lock: {simulateBackendLock}");
+        Console.WriteLine($"Binding Path: {HadthaiLicenseClient.GetActivationBindingPath(keyNum)}");
+        Console.WriteLine($"Registry Path: {HadthaiLicenseClient.GetActivationRegistryPath()}");
 
         int result = mode == "activate"
             ? await client.CheckLicenseHadthaiInstallAsync(keyNum, uid)
@@ -111,10 +147,12 @@ internal static class Program
     {
         Console.WriteLine("Hadthai license harness");
         Console.WriteLine("Arguments:");
-        Console.WriteLine("  --mode=validate|activate");
+        Console.WriteLine("  --mode=validate|activate|showuid|release|resetregistry");
         Console.WriteLine("  --baseUrl=https://ld-api.uat.rtt.in.th");
         Console.WriteLine("  --key=ABCDE12345FGHIJ67890KLMN");
         Console.WriteLine("    Hyphens are optional. Example: ABCDE-12345-FGHIJ-67890-KLMN");
         Console.WriteLine("  --uid=<device uid>");
+        Console.WriteLine("  --allowUidOverride=true|false");
+        Console.WriteLine("  --simulateBackendLock=true|false");
     }
 }
